@@ -9,6 +9,24 @@ const instructions = Platform.select({
 
 export default class App extends React.Component {
 
+  constructor(props) {
+    super(props);
+    this.state = {
+        tasks : [
+          {task: 'Buy Milk', isCompleted: false},
+          {task: 'Finish the project', isCompleted: false},
+          {task: 'Upload the file', isCompleted: false},
+          {task: 'Call the event managers', isCompleted: false},
+          {task: 'count random', isCompleted: false},
+          {task: 'Visit the temple', isCompleted: false},
+          {task: 'feed the dog', isCompleted: false},
+          {task: 'watch the lecture', isCompleted: false},
+          {task: 'foo bar baz', isCompleted: false},
+          {task: 'buy takeaway food', isCompleted: false},
+        ]
+      }
+  }
+
 
   render() {
     return (
@@ -16,61 +34,24 @@ export default class App extends React.Component {
         <Text style={styles.welcome}>tasker</Text>
         <ScrollView>
           <View style={styles.detailsView}>
-            <Text style={styles.h1}>12</Text>
+            <Text style={styles.h1}>{this.state.tasks.length}</Text>
             <Text style={styles.h2}>Tasks for today</Text>
             <Text style={styles.h3}>2 tasks done</Text>
           </View>
 
-          <View><Text style={styles.tasklist}>Buy Milk</Text> 
-            <TouchableOpacity style={styles.completeButton}>
-            </TouchableOpacity>
-          </View>
+          
+            {this.state.tasks.map( (task, index) => {
+          
+            return (
+              <View key={index}>
+                <Text style={styles.tasklist}>{task.task}</Text> 
+                <TouchableOpacity style={styles.completeButton}>
+                </TouchableOpacity>
+              </View> 
+              )
+            })}
+          
 
-          <View><Text style={styles.tasklist}>Buy Milk</Text> 
-            <TouchableOpacity style={styles.completeButton}>
-            </TouchableOpacity>
-          </View>
-          <View>
-            <Text style={styles.tasklist}>Buy Milk</Text> 
-            <TouchableOpacity style={styles.completeButton}>
-            </TouchableOpacity>
-          </View>
-          <View><Text style={styles.tasklist}>Buy Milk</Text> 
-            <TouchableOpacity style={styles.completeButton}>
-            </TouchableOpacity>
-          </View>
-          <View><Text style={styles.tasklist}>Buy Milk</Text> 
-            <TouchableOpacity style={styles.completeButton}>
-            </TouchableOpacity>
-          </View>
-          <View><Text style={styles.tasklist}>Buy Milk</Text> 
-            <TouchableOpacity style={styles.completeButton}>
-            </TouchableOpacity>
-          </View>
-          <View><Text style={styles.tasklist}>Buy Milk</Text> 
-            <TouchableOpacity style={styles.completeButton}>
-            </TouchableOpacity>
-          </View>
-          <View><Text style={styles.tasklist}>Buy Milk</Text> 
-            <TouchableOpacity style={styles.completeButton}>
-            </TouchableOpacity>
-          </View>
-          <View><Text style={styles.tasklist}>Buy Milk</Text> 
-            <TouchableOpacity style={styles.completeButton}>
-            </TouchableOpacity>
-          </View>
-          <View><Text style={styles.tasklist}>Buy Milk</Text> 
-            <TouchableOpacity style={styles.completeButton}>
-            </TouchableOpacity>
-          </View>
-          <View><Text style={styles.tasklist}>Buy Milk</Text> 
-            <TouchableOpacity style={styles.completeButton}>
-            </TouchableOpacity>
-          </View>
-          <View><Text style={styles.tasklist}>Buy Milk</Text> 
-            <TouchableOpacity style={styles.completeButton}>
-            </TouchableOpacity>
-          </View>
         </ScrollView>
 
         <TouchableOpacity style={styles.addButton}>
@@ -125,7 +106,7 @@ const styles = StyleSheet.create({
     paddingBottom: 20,
     marginLeft: 20,
     marginRight: 20,
-    fontWeight: '900',  
+    fontWeight: '600',  
   },
   completeButton: {
     borderColor: '#777E8B',
