@@ -1,6 +1,8 @@
 import * as React from 'react';
 import { Platform, StyleSheet, Text, View , Button, ScrollView, TouchableOpacity} from 'react-native';
 import { TextInput } from 'react-native-gesture-handler';
+import * as SQLite from 'expo-sqlite';
+const db = SQLite.openDatabase('UserDatabase.db');
 
 const instructions = Platform.select({
   ios: `Press Cmd+R to reload,\nCmd+D or shake for dev menu`,
@@ -11,22 +13,35 @@ export default class App extends React.Component {
 
   constructor(props) {
     super(props);
+    
     this.state = {
-        tasks : [
-          {task: 'Buy Milk', isCompleted: false},
-          {task: 'Finish the project', isCompleted: false},
-          {task: 'Upload the file', isCompleted: false},
-          {task: 'Call the event managers', isCompleted: false},
-          {task: 'count random', isCompleted: false},
-          {task: 'Visit the temple', isCompleted: false},
-          {task: 'feed the dog', isCompleted: false},
-          {task: 'watch the lecture', isCompleted: false},
-          {task: 'foo bar baz', isCompleted: false},
-          {task: 'buy takeaway food', isCompleted: false},
-        ]
+        tasks : []
       }
+
+      
   }
 
+
+  componentDidMount () {
+    db.transaction( tx => {
+      tx.executeSql(
+        "CREATE TABLE IF NOT EXISTS taskdetails (id INTEGER PRIMARY KEY AUTOINCREMENT, task TEXT);",
+        );
+      });
+
+        db.transaction( tx => {
+          tx.executeSql(
+            "SELECT task FROM taskdetails WHERE id=1;", 
+            [],
+            (_, { rows }) => {
+              const str = JSON.parse(rows.item(0)['task'])
+              this.setState({
+                tasks: str,
+              }) 
+            }
+            );
+          });
+     }
 
   render() {
     return (
@@ -45,7 +60,7 @@ export default class App extends React.Component {
             return (
               <View key={index}>
                 <Text style={styles.tasklist}>{task.task}</Text> 
-                <TouchableOpacity style={styles.completeButton}>
+                <TouchableOpacity onPress={() => this.completed(index)} style={styles.completeButton}>
                 </TouchableOpacity>
               </View> 
               )
@@ -54,13 +69,43 @@ export default class App extends React.Component {
 
         </ScrollView>
 
-        <TouchableOpacity style={styles.addButton}>
+        <TouchableOpacity onPress={this.addTask} style={styles.addButton}>
           <Text style={styles.addBtn}>+</Text>
         </TouchableOpacity>
       </View>
     );
   }
+
+  addTask = () => {
+    const task = {task: 'buy chineese food', isCompleted: false}
+    const  tasks = [...this.state.tasks, task]
+    this.setState({
+      tasks
+    })
+    this.updateDb();
+  }
+
+  completed = (index) => {
+    this.setState(() => {
+      const tasks = [...this.state.tasks];
+      tasks.splice(index, 1);
+      return {
+          tasks
+      };
+    })
+    this.updateDb();
+  }
+
+  updateDb = () => {
+    db.transaction( tx => {
+    tx.executeSql(
+      "UPDATE taskdetails SET task = ? WHERE id=1;", 
+      [JSON.stringify(this.state.tasks)],
+      );
+    });
+  }
 }
+
 //alignItems: 'center',
 const styles = StyleSheet.create({
   container: {
