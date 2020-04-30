@@ -1,7 +1,7 @@
 import * as React from 'react';
-import { Platform, StyleSheet, Text, View , Button, ScrollView, TouchableOpacity} from 'react-native';
-import { TextInput } from 'react-native-gesture-handler';
+import { Platform, StyleSheet, Text, View, ScrollView, TouchableOpacity, Vibration} from 'react-native';
 import * as SQLite from 'expo-sqlite';
+import { TextInput } from 'react-native-gesture-handler';
 const db = SQLite.openDatabase('UserDatabase.db');
 
 const instructions = Platform.select({
@@ -15,7 +15,10 @@ export default class App extends React.Component {
     super(props);
     
     this.state = {
-        tasks : []
+        tasks : [],
+        statusOfAdd: false,
+        task: '',
+        buttonFirstPress: true,
       }
 
       
@@ -29,18 +32,18 @@ export default class App extends React.Component {
         );
       });
 
-        db.transaction( tx => {
-          tx.executeSql(
-            "SELECT task FROM taskdetails WHERE id=1;", 
-            [],
-            (_, { rows }) => {
-              const str = JSON.parse(rows.item(0)['task'])
-              this.setState({
-                tasks: str,
-              }) 
-            }
-            );
-          });
+      db.transaction( tx => {
+        tx.executeSql(
+          "SELECT task FROM taskdetails WHERE id=1;", 
+          [],
+          (_, { rows }) => {
+            const str = JSON.parse(rows.item(0)['task'])
+            this.setState({
+              tasks: str,
+            }) 
+          }
+          );
+        });
      }
 
   render() {
@@ -68,24 +71,56 @@ export default class App extends React.Component {
           
 
         </ScrollView>
-
+        {
+          this.state.statusOfAdd ? 
+          <View style={styles.addTaskView}>
+          <TextInput style={styles.textInput} 
+            value={this.state.task} 
+            onChangeText={this.handleTextChanges} 
+            autoFocus={true}
+            />
+          </View> : null
+        }
         <TouchableOpacity onPress={this.addTask} style={styles.addButton}>
           <Text style={styles.addBtn}>+</Text>
         </TouchableOpacity>
+        
       </View>
     );
   }
 
+
+  handleTextChanges = task => {
+     this.setState({task})
+  }
+
   addTask = () => {
-    const task = {task: 'buy chineese food', isCompleted: false}
+    Vibration.vibrate(40)
+    if (this.state.buttonFirstPress){
+      this.setState({
+      statusOfAdd: true,
+      buttonFirstPress: false,
+    })
+    } else if (this.state.task !== ''){
+    const task = {task: this.state.task, isCompleted: false}
     const  tasks = [...this.state.tasks, task]
     this.setState({
-      tasks
+      tasks,
+      statusOfAdd: false,
+      buttonFirstPress: true,
+      task: ''
     })
     this.updateDb();
+    } else {
+      this.setState({
+        statusOfAdd: false,
+        buttonFirstPress: true,
+      })
+    } 
   }
 
   completed = (index) => {
+    Vibration.vibrate(30)
     this.setState(() => {
       const tasks = [...this.state.tasks];
       tasks.splice(index, 1);
@@ -106,7 +141,7 @@ export default class App extends React.Component {
   }
 }
 
-//alignItems: 'center',
+
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -135,7 +170,7 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
   h3: {
-    fontSize: 20,
+    fontSize: 15,
     color: '#8395A7',
     paddingLeft: 10,
   },
@@ -185,5 +220,28 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     backgroundColor: 'white',
   },
+  textInput: {
+    justifyContent: 'flex-start',
+    position: 'absolute',
+    bottom: 0,
+    padding: 5,
+    paddingRight: 10,
+    paddingBottom: 10,
+    paddingLeft: 10,
+    alignSelf: 'flex-start',
+    borderWidth: 1,
+    width: 280,
+    backgroundColor: 'white',
+    borderColor: '#EA7773',
+    marginLeft: 10,
+    marginBottom: 15,
+    borderRadius: 30,
+    height: 65,
+    fontSize: 20,
+  },
+  addTaskView: {
+    backgroundColor: 'white',
+    height: 85,
+  }
   
 });
