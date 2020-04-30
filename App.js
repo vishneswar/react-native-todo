@@ -19,6 +19,7 @@ export default class App extends React.Component {
         statusOfAdd: false,
         task: '',
         buttonFirstPress: true,
+        completedTaskCounter: 0,
       }
 
       
@@ -32,18 +33,22 @@ export default class App extends React.Component {
         );
       });
 
-      db.transaction( tx => {
-        tx.executeSql(
-          "SELECT task FROM taskdetails WHERE id=1;", 
-          [],
-          (_, { rows }) => {
-            const str = JSON.parse(rows.item(0)['task'])
-            this.setState({
-              tasks: str,
-            }) 
-          }
-          );
-        });
+    db.transaction( tx => {
+      tx.executeSql(
+        "SELECT task FROM taskdetails WHERE id=1;", 
+        [],
+        (_, { rows }) => {
+          const str = JSON.parse(rows.item(0)['task'])
+          this.setState({
+            tasks: str,
+          }) 
+        }
+        );
+      });
+
+    var hours = new Date().getHours(); 
+    var min = new Date().getMinutes();
+
      }
 
   render() {
@@ -52,9 +57,9 @@ export default class App extends React.Component {
         <Text style={styles.welcome}>tasker</Text>
         <ScrollView>
           <View style={styles.detailsView}>
-            <Text style={styles.h1}>{this.state.tasks.length}</Text>
+            <Text style={styles.h1}>{this.state.tasks.length === 0 ? 'Add' : this.state.tasks.length}</Text>
             <Text style={styles.h2}>Tasks for today</Text>
-            <Text style={styles.h3}>2 tasks done</Text>
+            <Text style={styles.h3}><Text style={styles.h4}> {this.state.completedTaskCounter}</Text> tasks done</Text>
           </View>
 
           
@@ -125,7 +130,8 @@ export default class App extends React.Component {
       const tasks = [...this.state.tasks];
       tasks.splice(index, 1);
       return {
-          tasks
+          tasks,
+          completedTaskCounter: this.state.completedTaskCounter + 1
       };
     })
     this.updateDb();
@@ -172,7 +178,11 @@ const styles = StyleSheet.create({
   h3: {
     fontSize: 15,
     color: '#8395A7',
-    paddingLeft: 10,
+    paddingLeft: 5,
+  },
+  h4: {
+    fontWeight: 'bold',
+    fontSize: 17,
   },
   tasklist: {
     fontSize: 20,
